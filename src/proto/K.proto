@@ -1,0 +1,28 @@
+syntax = "proto3";
+option java_package = "fr.magnus.budget.transverse";
+option optimize_for = SPEED;
+
+enum GrpcPetCategory {
+  Dog = 0;
+  Cat = 1;
+  Bunny = 2;
+}
+
+enum GrpcPetStatus {
+  Available = 0;
+  Pending = 1;
+  Sold = 2;
+}
+
+message GrpcPet {
+  optional sint64 id = 1;
+  optional string name = 2;
+  optional GrpcPetCategory category = 3;
+  repeated string photoUrls = 4;
+  optional string tags = 5;
+  optional GrpcPetStatus status = 6;
+}
+
+message GrpcPets {
+  repeated GrpcPet grpcPet = 1;
+}
