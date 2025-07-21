@@ -3,6 +3,7 @@ import { PetsService } from './pets.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Pet } from '../../lib/types';
+import { GrpcPet, grpcPetCategoryFromJSON, grpcPetStatusFromJSON } from '../../generated/src/proto/K';
 
 type FrontPet = {
   id?: number;
@@ -39,33 +40,56 @@ export class PetsComponent implements OnInit {
     this.fetchPets();
   }
 
+  // fetchPets() {
+  //   this.petsService.getPets().subscribe((data) => {
+  //     this.pets = data;
+  //   });
+  // }
   fetchPets() {
-    this.petsService.getPets().subscribe((data) => {
-      this.pets = data;
+    this.petsService.getPets().subscribe((data: GrpcPet[]) => {
+      this.pets = data.map((grpcPet) => ({
+        id: grpcPet.id,
+        name: grpcPet.name ?? '',
+        category: grpcPet.category?.toString() ?? '',
+        tags: grpcPet.tags ?? '',
+        photoUrls: grpcPet.photoUrls ?? [],
+        status: grpcPet.status?.toString() ?? '',
+      }));
     });
   }
 
-  createPet() {
-    this.petsService
-      .createPet({
-        ...this.newPet,
-        photoUrls: this.newPet.photoUrls
-          .split(',')
-          .filter((url: string) => url.trim() !== ''),
-      })
-      .subscribe(() => {
-        this.newPet = {
-          name: '',
-          category: '',
-          tags: '',
-          photoUrls: '',
-          status: '',
-        };
-      });
-  }
+
+ createPet() {
+  const grpcPet: GrpcPet = {
+    name: this.newPet.name,
+    category: grpcPetCategoryFromJSON(this.newPet.category),
+    photoUrls: this.newPet.photoUrls
+      .split(',')
+      .map((url) => url.trim())
+      .filter((url) => url !== ''),
+    tags: this.newPet.tags,
+    status: grpcPetStatusFromJSON(this.newPet.status),
+  };
+
+  const encoded = GrpcPet.encode(grpcPet).finish();
+
+  console.log('Encoded Protobuf bytes:', encoded);
+  console.log('Decoded again for verification:', GrpcPet.decode(encoded));
+
+  this.petsService.createPet(grpcPet).subscribe(() => {
+    this.newPet = {
+      name: '',
+      category: '',
+      tags: '',
+      photoUrls: '',
+      status: '',
+    };
+    this.fetchPets(); // optional
+  });
+}
 
   deletePet(id?: number) {
-    this.petsService.deletePet(id).subscribe();
+    this.petsService.deletePet(id);
   }
 
   editPet(pet: Pet) {

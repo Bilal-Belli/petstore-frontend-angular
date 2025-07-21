@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { OrdersService } from './orders.service';
 import { Order, Pet } from '../../lib/types';
 import { PetsService } from '../pets/pets.service';
-
+import { GrpcPet } from '../../generated/src/proto/K';
 @Component({
   selector: 'app-orders',
   templateUrl: './orders.component.html',
@@ -43,11 +43,23 @@ export class OrdersComponent implements OnInit {
     });
   }
 
+  // fetchPets() {
+  //   this.petService.getPets().subscribe((data: GrpcPet[]) => {
+  //     this.pets = data;
+  //   });
+  // }
   fetchPets() {
-    this.petService.getPets().subscribe((data) => {
-      this.pets = data;
-    });
-  }
+      this.petService.getPets().subscribe((data: GrpcPet[]) => {
+        this.pets = data.map((grpcPet) => ({
+          id: grpcPet.id,
+          name: grpcPet.name ?? '',
+          category: grpcPet.category?.toString() ?? '',
+          tags: grpcPet.tags ?? '',
+          photoUrls: grpcPet.photoUrls ?? [],
+          status: grpcPet.status?.toString() ?? '',
+        }));
+      });
+    }
 
   createOrder() {
     if (!this.newOrder.petId || !this.newOrder.status) {
@@ -67,7 +79,7 @@ export class OrdersComponent implements OnInit {
   }
 
   deleteOrder(id?: number) {
-    this.ordersService.deleteOrder(id).subscribe();
+    this.ordersService.deleteOrder(id);
   }
 
   editOrder(order: Order) {
