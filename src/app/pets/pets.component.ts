@@ -40,11 +40,6 @@ export class PetsComponent implements OnInit {
     this.fetchPets();
   }
 
-  // fetchPets() {
-  //   this.petsService.getPets().subscribe((data) => {
-  //     this.pets = data;
-  //   });
-  // }
   fetchPets() {
     this.petsService.getPets().subscribe((data: GrpcPet[]) => {
       this.pets = data.map((grpcPet) => ({
@@ -58,7 +53,6 @@ export class PetsComponent implements OnInit {
     });
   }
 
-
  createPet() {
   const grpcPet: GrpcPet = {
     name: this.newPet.name,
@@ -71,22 +65,17 @@ export class PetsComponent implements OnInit {
     status: grpcPetStatusFromJSON(this.newPet.status),
   };
 
-  const encoded = GrpcPet.encode(grpcPet).finish();
-
-  console.log('Encoded Protobuf bytes:', encoded);
-  console.log('Decoded again for verification:', GrpcPet.decode(encoded));
-
   this.petsService.createPet(grpcPet).subscribe(() => {
-    this.newPet = {
-      name: '',
-      category: '',
-      tags: '',
-      photoUrls: '',
-      status: '',
-    };
-    this.fetchPets(); // optional
-  });
-}
+      this.newPet = {
+        name: '',
+        category: '',
+        tags: '',
+        photoUrls: '',
+        status: '',
+      };
+      this.fetchPets(); // optional
+    });
+  }
 
   deletePet(id?: number) {
     this.petsService.deletePet(id);

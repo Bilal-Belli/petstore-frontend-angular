@@ -43,11 +43,6 @@ export class OrdersComponent implements OnInit {
     });
   }
 
-  // fetchPets() {
-  //   this.petService.getPets().subscribe((data: GrpcPet[]) => {
-  //     this.pets = data;
-  //   });
-  // }
   fetchPets() {
       this.petService.getPets().subscribe((data: GrpcPet[]) => {
         this.pets = data.map((grpcPet) => ({
